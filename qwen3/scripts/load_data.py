@@ -25,7 +25,7 @@ def cargar_obras_maestro():
         columnas_requeridas = [
             'id', 'OBRA', 'EMPRESA', 'BARRIO', 'INICIO', 
             'FINAL', 'PLAZO ORIGINAL', 'AVANCE MENSUAL CONJUNTO', 
-            'AVANCE ACUMULADO CONJUNTO'
+            'AVANCE ACUMULADO CONJUNTO', 'Lp'
         ]
 
         faltantes = [col for col in columnas_requeridas if col not in df.columns]
@@ -182,6 +182,7 @@ def procesar_archivos_individuales():
 # -----------------------------
 # 7. Integrar todo y guardar JSON
 # -----------------------------
+
 def generar_json_final():
     df_obras = cargar_obras_maestro()
     if df_obras.empty:
@@ -192,17 +193,25 @@ def generar_json_final():
 
     obras_json = []
     for _, row in df_obras.iterrows():
-        id_obra = str(row['id']).split('.')[0]  # Quitar .0 si es decimal
+        id_obra = str(row['id']).split('.')[0]
+
+        # Limpiar valores NaN y convertir a tipo seguro
+        def safe_value(val):
+            if pd.isna(val):
+                return None
+            return val
+
         obra = {
             "id_obra": id_obra,
-            "nombre": row['OBRA'],
-            "contratista": row['EMPRESA'],
-            "barrio": row['BARRIO'],
-            "fecha_inicio": str(row['INICIO']),
-            "fecha_fin_original": str(row['FINAL']),
-            "plazo_obra": row['PLAZO ORIGINAL'],
-            "avance_mensual": row['AVANCE MENSUAL CONJUNTO'],
-            "avance_acumulado": row['AVANCE ACUMULADO CONJUNTO'],
+            "nombre": safe_value(row['OBRA']),
+            "contratista": safe_value(row['EMPRESA']),
+            "lp_cd":safe_value(row['Lp']),
+            "barrio": safe_value(row['BARRIO']),
+            "fecha_inicio": str(safe_value(row['INICIO'])) if not pd.isna(row['INICIO']) else None,
+            "fecha_fin_original": str(safe_value(row['FINAL'])) if not pd.isna(row['FINAL']) else None,
+            "plazo_obra": safe_value(row['PLAZO ORIGINAL']),
+            "avance_mensual": float(row['AVANCE MENSUAL CONJUNTO']) if not pd.isna(row['AVANCE MENSUAL CONJUNTO']) else 0.0,
+            "avance_acumulado": float(row['AVANCE ACUMULADO CONJUNTO']) if not pd.isna(row['AVANCE ACUMULADO CONJUNTO']) else 0.0,
             "avances": datos_detalle.get(id_obra, {}).get("avances", []),
             "ampliaciones": datos_detalle.get(id_obra, {}).get("ampliaciones", [])
         }
@@ -211,12 +220,11 @@ def generar_json_final():
     # Crear carpeta si no existe
     os.makedirs('../frontend/public/data', exist_ok=True)
 
-    # Guardar en JSON
+    # Guardar en JSON (sin ensure_ascii para caracteres especiales)
     with open('../frontend/public/data/obras-detalladas.json', 'w', encoding='utf-8') as f:
-        json.dump(obras_json, f, indent=2, ensure_ascii=False)
+        json.dump(obras_json, f, indent=2, ensure_ascii=False, default=str)
 
     print(f"\n📁 Datos de {len(obras_json)} obras guardados en /frontend/public/data/obras-detalladas.json")
-
 # -----------------------------
 # 8. Ejecutar
 # -----------------------------

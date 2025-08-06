@@ -3,19 +3,38 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function ObrasPorBarrio() {
-  const { barrio } = useParams(); // Ej: "Barrio 20"
+  const { barrio } = useParams(); // Ej: "BARRIO 20"
   const [obras, setObras] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("🔍 Cargando obras para barrio:", barrio);
+
     fetch('/data/obras-detalladas.json')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(data => {
-        // Filtrar obras por barrio
+        console.log("📄 Datos cargados:", data.length, "obras");
         const obrasFiltradas = data.filter(obra => obra.barrio === barrio);
+        console.log("✅ Obras filtradas:", obrasFiltradas);
         setObras(obrasFiltradas);
+      })
+      .catch(err => {
+        console.error("❌ Error al cargar obras:", err);
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [barrio]);
+
+  if (loading) return <div>Cargando obras para {barrio}...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (obras.length === 0) return <div>No se encontraron obras para {barrio}.</div>;
 
   return (
     <div className="container mx-auto px-8 py-8">
