@@ -25,7 +25,7 @@ def cargar_obras_maestro():
         columnas_requeridas = [
             'id', 'OBRA', 'EMPRESA', 'BARRIO', 'INICIO', 
             'FINAL', 'PLAZO ORIGINAL', 'AVANCE MENSUAL CONJUNTO', 
-            'AVANCE ACUMULADO CONJUNTO', 'Lp'
+            'AVANCE ACUMULADO CONJUNTO','FECHA AVANCE', 'Lp'
         ]
 
         faltantes = [col for col in columnas_requeridas if col not in df.columns]
@@ -207,11 +207,12 @@ def generar_json_final():
             "contratista": safe_value(row['EMPRESA']),
             "lp_cd":safe_value(row['Lp']),
             "barrio": safe_value(row['BARRIO']),
-            "fecha_inicio": str(safe_value(row['INICIO'])) if not pd.isna(row['INICIO']) else None,
-            "fecha_fin_original": str(safe_value(row['FINAL'])) if not pd.isna(row['FINAL']) else None,
+            "fecha_inicio": str(safe_value(row['INICIO']))[:10] if not pd.isna(row['INICIO']) else None,
+            "fecha_fin_original": str(safe_value(row['FINAL']))[:10] if not pd.isna(row['FINAL']) else None,
             "plazo_obra": safe_value(row['PLAZO ORIGINAL']),
             "avance_mensual": float(row['AVANCE MENSUAL CONJUNTO']) if not pd.isna(row['AVANCE MENSUAL CONJUNTO']) else 0.0,
             "avance_acumulado": float(row['AVANCE ACUMULADO CONJUNTO']) if not pd.isna(row['AVANCE ACUMULADO CONJUNTO']) else 0.0,
+            "fecha_avance": str(safe_value(row['FECHA AVANCE'])) if not pd.isna(row['FECHA AVANCE']) else None,
             "avances": datos_detalle.get(id_obra, {}).get("avances", []),
             "ampliaciones": datos_detalle.get(id_obra, {}).get("ampliaciones", [])
         }

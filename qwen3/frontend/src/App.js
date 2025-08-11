@@ -13,25 +13,36 @@ function App() {
     <Router>
       <>
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/barrios" element={
-            <ProtectedRoute>
-              <Barrios />
-            </ProtectedRoute>
-          } />
-          <Route path="/barrio/:barrio" element={
-            <ProtectedRoute>
-              <ObrasPorBarrio />
-            </ProtectedRoute>
-          } />
-          <Route path="/obra/:id" element={
-            <ProtectedRoute>
-              <DetalleObra />
-            </ProtectedRoute>
-          } />
-        </Routes>
+        <div className="pt-4">
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/barrios"
+              element={
+                <ProtectedRoute>
+                  <Barrios />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/barrio/:barrio"
+              element={
+                <ProtectedRoute>
+                  <ObrasPorBarrio />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/obra/:id"
+              element={
+                <ProtectedRoute>
+                  <DetalleObra />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
       </>
     </Router>
   );

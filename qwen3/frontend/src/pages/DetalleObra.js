@@ -1,10 +1,21 @@
 // src/pages/DetalleObra.js
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LabelList,
+} from 'recharts';
 
 export default function DetalleObra() {
-  const { id } = useParams(); // ID de la obra
+  const { id } = useParams();
   const [obra, setObra] = useState(null);
 
   useEffect(() => {
@@ -16,66 +27,134 @@ export default function DetalleObra() {
       });
   }, [id]);
 
-  if (!obra) return <div>Cargando...</div>;
+  if (!obra) return <div className="p-8">Cargando detalle de obra...</div>;
+
+  // Datos para el gráfico (solo si hay avances)
+  const datosGrafico = obra.avances.length > 0 ? obra.avances : [];
 
   return (
     <div className="container mx-auto px-8 py-8">
-      <h1 className="text-3xl font-bold mb-6">Detalle de Obra</h1>
+      {/* Encabezado */}
       <div className="bg-white p-6 rounded shadow mb-8">
-        <h2 className="text-2xl font-semibold mb-4">{obra.nombre}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div><strong>ID:</strong> {obra.id_obra}</div>
-          <div><strong>Contratista:</strong> {obra.contratista}</div>
-          <div><strong>Barrio:</strong> {obra.barrio}</div>
-          <div><strong>Inicio:</strong> {obra.fecha_inicio}</div>
-          <div><strong>Fin Original:</strong> {obra.fecha_fin_original}</div>
-          <div><strong>Plazo:</strong> {obra.plazo_obra}</div>
-          <div><strong>Avance Acumulado:</strong> {(obra.avance_acumulado * 100).toFixed(2)}%</div>
-          <div><strong>Avance Mensual:</strong> {(obra.avance_mensual * 100).toFixed(2)}%</div>
+        <h1 className="text-3xl font-bold text-gray-800">{obra.nombre}</h1>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+          <div>
+            <strong>ID:</strong> {obra.id_obra}<br />
+            <strong>Barrio:</strong> {obra.barrio}
+          </div>
+          <div>
+            <strong>Contratista:</strong> {obra.contratista}<br />
+            <strong>LP/CD:</strong> {obra.lp_cd || "No asignado"}
+          </div>
+          <div>
+            <strong>Fecha de Inicio:</strong> {obra.fecha_inicio?.split(' ')[0]}<br />
+            <strong>Fecha de Fin Contractual:</strong> {obra.fecha_fin_original?.split(' ')[0]}
+          </div>
+          <div>
+            <strong>Avance Acumulado:</strong> {(obra.avance_acumulado * 100).toFixed(2)}% <br />
+            <strong>Avance Mensual:</strong> {(obra.avance_mensual * 100).toFixed(2)}% <br />
+            <strong>Fecha de Última Medición:</strong> {obra.fecha_avance}
+          </div>
         </div>
       </div>
 
       {/* Gráfico de Avances */}
-      <div className="bg-white p-6 rounded shadow mb-8">
-        <h3 className="text-xl font-semibold mb-4">Avance Acumulado: Real vs Esperado</h3>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={obra.avances}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="mes" />
-            <YAxis tickFormatter={(value) => `${(value * 100).toFixed(0)}%`} />
-            <Tooltip formatter={(value) => [(value * 100).toFixed(2) + '%']} />
-            <Legend />
-            <Bar dataKey="real" fill="#2F855A" name="Real" />
-            <Bar dataKey="esperado" fill="#4299E1" name="Esperado" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {datosGrafico.length > 0 && (
+        <div className="bg-white p-6 rounded shadow mb-8">
+          <h2 className="text-2xl font-semibold mb-4">COMPARATIVA ENTRE PLAN DE TRABAJOS OFERTA, ENVOLVENTES DE PLIEGO Y AVANCE REAL</h2>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={datosGrafico} margin={{ top: 5, right: 20, bottom: 5, left: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="mes" label={{ value: 'Meses', position: 'insideBottomRight', offset: -5 }} tickFormatter={(value) => value.toFixed(0)} />
+              <YAxis tickFormatter={(value) => `${(value * 100).toFixed(2)}%`} />
+              <Tooltip formatter={(value) => [(value * 100).toFixed(2) + '%']} />
+              <Legend />
+              {/* Envolvente Mínima */}
+              <Line
+                type="monotone"
+                dataKey="minima"
+                stroke="#2F855A"
+                name="Mínima"
+                dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
+                strokeDasharray="3 3"
+              />
+              {/* Envolvente Máxima */}
+              <Line
+                type="monotone"
+                dataKey="maxima"
+                stroke="#2F855A"
+                name="Máxima"
+                dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
+                strokeDasharray="3 3"
+              />
+              {/* Esperado */}
+              <Line
+                type="monotone"
+                dataKey="esperado"
+                stroke="#4299E1"
+                name="Esperado"
+                dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
+              />
+              {/* Real */}
+              <Line
+                type="monotone"
+                dataKey="real"
+                stroke="#FF5733"
+                name="Real"
+                dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
+              />
+              {/* Etiquetas de valores en los puntos */}
+              <LabelList dataKey="real" content={({ x, y, value }) => <text x={x} y={y} dx={-10} dy={-5}>{`${(value * 100).toFixed(2)}%`}</text>} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Ampliaciones */}
       <div className="bg-white p-6 rounded shadow mb-8">
-        <h3 className="text-xl font-semibold mb-4">Ampliaciones</h3>
-        <ul className="list-disc pl-5">
+        <h2 className="text-2xl font-semibold mb-4">Ampliaciones</h2>
+        <ul className="list-disc pl-5 space-y-2">
           {obra.ampliaciones.length > 0 ? (
-            obra.ampliaciones.map((amp, i) => <li key={i}>{amp}</li>)
+            obra.ampliaciones.map((amp, i) => <li key={i} className="text-gray-700">{amp}</li>)
           ) : (
-            <li>No hay ampliaciones registradas.</li>
+            <li className="text-gray-500">No hay ampliaciones registradas.</li>
           )}
         </ul>
       </div>
 
-      {/* Botones de secciones */}
-      <div className="flex space-x-4">
-        <button className="bg-primary text-white px-4 py-2 rounded">Aprobaciones</button>
-        <button className="bg-primary text-white px-4 py-2 rounded">Plan/Curva</button>
-        <button className="bg-primary text-white px-4 py-2 rounded">Avances</button>
-        <button className="bg-primary text-white px-4 py-2 rounded">Ampliaciones estudiadas</button>
-        <button className="bg-primary text-white px-4 py-2 rounded">Planos</button>
-        <button className="bg-primary text-white px-4 py-2 rounded">Pliegos</button>
+      {/* Secciones */}
+      <div className="bg-white p-6 rounded shadow">
+        <h2 className="text-2xl font-semibold mb-6">Documentos y Secciones</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <button className="bg-primary text-white py-3 px-4 rounded hover:bg-green-700 transition">
+            Aprobaciones
+          </button>
+          <button className="bg-primary text-white py-3 px-4 rounded hover:bg-green-700 transition">
+            Plan/Curva
+          </button>
+          <button className="bg-primary text-white py-3 px-4 rounded hover:bg-green-700 transition">
+            Avances
+          </button>
+          <button className="bg-primary text-white py-3 px-4 rounded hover:bg-green-700 transition">
+            Ampliaciones estudiadas
+          </button>
+          <button className="bg-primary text-white py-3 px-4 rounded hover:bg-green-700 transition">
+            Planos
+          </button>
+          <button className="bg-primary text-white py-3 px-4 rounded hover:bg-green-700 transition">
+            Pliegos
+          </button>
+        </div>
       </div>
 
+      {/* Botón volver */}
       <button
         onClick={() => window.history.back()}
-        className="mt-6 bg-dark text-light px-4 py-2 rounded hover:bg-gray-800"
+        className="mt-6 bg-dark text-light px-6 py-2 rounded hover:bg-gray-800"
       >
         ← Volver
       </button>

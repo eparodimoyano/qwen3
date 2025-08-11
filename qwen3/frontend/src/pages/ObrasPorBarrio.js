@@ -45,7 +45,8 @@ export default function ObrasPorBarrio() {
             <tr className="bg-gray-100">
               <th className="py-2 px-4 border">ID</th>
               <th className="py-2 px-4 border">Obra</th>
-              <th className="py-2 px-4 border">LP</th>
+              <th className="py-2 px-4 border">Contratista</th>  
+              <th className="py-2 px-4 border">LP/CD</th>        
             </tr>
           </thead>
           <tbody>
@@ -57,7 +58,8 @@ export default function ObrasPorBarrio() {
               >
                 <td className="py-2 px-4 border">{obra.id_obra}</td>
                 <td className="py-2 px-4 border">{obra.nombre}</td>
-                <td className="py-2 px-4 border">{obra.lp_cd || "Sin LP"}</td>
+                <td className="py-2 px-4 border">{obra.contratista}</td>  {/* Contratista */}
+                <td className="py-2 px-4 border">{obra.lp_cd || "Sin LP/CD"}</td>
               </tr>
             ))}
           </tbody>
