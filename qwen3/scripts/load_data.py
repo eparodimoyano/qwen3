@@ -8,34 +8,40 @@ import os
 from pathlib import Path
 
 # -----------------------------
-# 1. Cargar el archivo maestro con todas las obras
+# 1. Cargar el archivo maestro con todas las obras, eolo filas con algun dato en ID
 # -----------------------------
 def cargar_obras_maestro():
     try:
         df = pd.read_excel(
             "../data/000 - PLANES Y AMPLIACIONES.xls",
             sheet_name="Hoja1",
-            header=3  # Fila 4 del Excel
+            header=3  # Fila 4 del Excel como encabezado
         )
 
-        # Normalizar nombres de columnas (quitar espacios extra)
+        # Quitar filas completamente vacías
+        df = df.dropna(how='all')
+
+        # Filtrar filas que tengan algo en 'id'
+        df = df[df['id'].notna()]
+
+        # Normalizar nombres de columnas
         df.columns = [str(col).strip() for col in df.columns]
 
         # Verificar columnas clave
         columnas_requeridas = [
             'id', 'OBRA', 'EMPRESA', 'BARRIO', 'INICIO', 
             'FINAL', 'PLAZO ORIGINAL', 'AVANCE MENSUAL CONJUNTO', 
-            'AVANCE ACUMULADO CONJUNTO','FECHA AVANCE', 'Lp'
+            'AVANCE ACUMULADO CONJUNTO', 'FECHA AVANCE', 'Lp'
         ]
 
         faltantes = [col for col in columnas_requeridas if col not in df.columns]
         if faltantes:
             raise KeyError(f"Faltan columnas: {faltantes}")
 
-        # Seleccionar y limpiar
+        # Seleccionar y limpiar columnas
         df = df[columnas_requeridas].copy()
         df['id'] = df['id'].astype(str).str.strip()
-        df['BARRIO'] = df['BARRIO'].fillna('BARRIO VARIOS').astype(str).str.strip().str.upper()
+        df['BARRIO'] = df['BARRIO'].astype(str).str.strip().str.upper()
 
         print(f"✅ Obras maestras cargadas: {len(df)}")
         return df
@@ -120,10 +126,10 @@ def cargar_avances_individual(ruta):
 
             avances.append({
                 "mes": mes,
-                "minima": round(minima, 2),
-                "maxima": round(maxima, 2),
-                "esperado": round(esperado, 2),
-                "real": round(real, 2)
+                "minima": round(minima, 4),
+                "maxima": round(maxima, 4),
+                "esperado": round(esperado, 4),
+                "real": round(real, 4)
             })
 
         print(f"✅ Avances extraídos: {len(avances)} registros desde {ruta}")

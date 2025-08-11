@@ -58,61 +58,85 @@ export default function DetalleObra() {
         </div>
       </div>
 
-      {/* Gráfico de Avances */}
-      {datosGrafico.length > 0 && (
-        <div className="bg-white p-6 rounded shadow mb-8">
-          <h2 className="text-2xl font-semibold mb-4">COMPARATIVA ENTRE PLAN DE TRABAJOS OFERTA, ENVOLVENTES DE PLIEGO Y AVANCE REAL</h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={datosGrafico} margin={{ top: 5, right: 20, bottom: 5, left: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="mes" label={{ value: 'Meses', position: 'insideBottomRight', offset: -5 }} tickFormatter={(value) => value.toFixed(0)} />
-              <YAxis tickFormatter={(value) => `${(value * 100).toFixed(2)}%`} />
-              <Tooltip formatter={(value) => [(value * 100).toFixed(2) + '%']} />
-              <Legend />
-              {/* Envolvente Mínima */}
-              <Line
-                type="monotone"
-                dataKey="minima"
-                stroke="#2F855A"
-                name="Mínima"
-                dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
-                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
-                strokeDasharray="3 3"
-              />
-              {/* Envolvente Máxima */}
-              <Line
-                type="monotone"
-                dataKey="maxima"
-                stroke="#2F855A"
-                name="Máxima"
-                dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
-                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
-                strokeDasharray="3 3"
-              />
-              {/* Esperado */}
-              <Line
-                type="monotone"
-                dataKey="esperado"
-                stroke="#4299E1"
-                name="Esperado"
-                dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
-                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
-              />
-              {/* Real */}
-              <Line
-                type="monotone"
-                dataKey="real"
-                stroke="#FF5733"
-                name="Real"
-                dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
-                activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
-              />
-              {/* Etiquetas de valores en los puntos */}
-              <LabelList dataKey="real" content={({ x, y, value }) => <text x={x} y={y} dx={-10} dy={-5}>{`${(value * 100).toFixed(2)}%`}</text>} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+    {/* Gráfico de Avances */}
+{datosGrafico.length > 0 && (
+  <div className="bg-white p-6 rounded shadow mb-8">
+    <h2 className="text-2xl font-semibold mb-4">
+      COMPARATIVA ENTRE PLAN DE TRABAJOS OFERTA, ENVOLVENTES DE PLIEGO Y AVANCE REAL
+    </h2>
+    <ResponsiveContainer width="100%" height={400}>
+      <LineChart data={datosGrafico} margin={{ top: 5, right: 20, bottom: 5, left: 20 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          dataKey="mes"
+          label={{ value: 'Meses', position: 'insideBottomRight', offset: -5 }}
+          tickFormatter={(value) => value.toFixed(0)}
+        />
+        <YAxis tickFormatter={(value) => `${(value * 100).toFixed(2)}%`} />
+        <Tooltip formatter={(value) => [(value * 100).toFixed(2) + '%']} />
+        <Legend />
+
+        {/* Envolvente Mínima */}
+        <Line
+          type="monotone"
+          dataKey="minima"
+          stroke="#2F855A"
+          name="Mínima"
+          dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+          activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
+          strokeDasharray="3 3"
+        />
+
+        {/* Envolvente Máxima */}
+        <Line
+          type="monotone"
+          dataKey="maxima"
+          stroke="#2F855A"
+          name="Máxima"
+          dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+          activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
+          strokeDasharray="3 3"
+        />
+
+        {/* Esperado */}
+        <Line
+          type="monotone"
+          dataKey="esperado"
+          stroke="#4299E1"
+          name="Esperado"
+          dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+          activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
+        />
+
+        {/* Real con etiquetas en negro */}
+        <Line
+          type="monotone"
+          dataKey="real"
+          stroke="#FF5733"
+          name="Real"
+          dot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
+          activeDot={{ r: 8, stroke: '#fff', strokeWidth: 3 }}
+        >
+          <LabelList
+            dataKey="real"
+            content={({ x, y, value }) => (
+              <text
+                x={x}
+                y={y}
+                dx={-10}
+                dy={-5}
+                fill="black" // Color del texto en negro
+              >
+                {`${(value * 100).toFixed(2)}%`}
+              </text>
+            )}
+          />
+        </Line>
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+)}
+
 
       {/* Ampliaciones */}
       <div className="bg-white p-6 rounded shadow mb-8">
